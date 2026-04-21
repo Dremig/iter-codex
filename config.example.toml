@@ -1,6 +1,6 @@
 # Required:
 # Must include {prompt_file}; may include {workspace}.
-agent_command_template = "codex exec --auto --prompt-file {prompt_file}"
+agent_command_template = "scripts/invoke-codex-agent.sh {prompt_file} {workspace}"
 
 # 0 means unbounded loop until stop condition.
 max_iterations = 0

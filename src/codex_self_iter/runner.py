@@ -98,7 +98,7 @@ def run(
     task_file_name: str = "TASK.md",
     plan_file_name: str = "plan.md",
     state_dir_name: str = ".codex-self-iter",
-    agent_command_template: str = "codex exec --auto --prompt-file {prompt_file}",
+    agent_command_template: str = "scripts/invoke-codex-agent.sh {prompt_file} {workspace}",
     config_path: Path | None = None,
 ) -> int:
     task_file = workspace / task_file_name

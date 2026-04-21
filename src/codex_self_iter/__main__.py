@@ -15,7 +15,7 @@ def main() -> int:
     parser.add_argument("--state-dir", default=".codex-self-iter", help="State/log directory")
     parser.add_argument(
         "--agent-command-template",
-        default="codex exec --auto --prompt-file {prompt_file}",
+        default="scripts/invoke-codex-agent.sh {prompt_file} {workspace}",
         help="Command template; supports {prompt_file} and {workspace}",
     )
     parser.add_argument("--config", default="", help="TOML config path (optional)")

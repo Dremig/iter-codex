@@ -42,7 +42,7 @@ python3 -m codex_self_iter \
   --task-file TASK.md \
   --plan-file plan.md \
   --state-dir .codex-self-iter \
-  --agent-command-template "codex exec --auto --prompt-file {prompt_file}"
+  --agent-command-template "scripts/invoke-codex-agent.sh {prompt_file} {workspace}"
 ```
 
 Or use:
@@ -72,6 +72,24 @@ Important fields:
 - `agent_command_template` must include `{prompt_file}`
 - `max_iterations = 0` means unbounded loop
 - `max_stagnation` prevents infinite cycling on identical `next_focus`
+
+## Approval and Privilege Mode
+
+Default wrapper `scripts/invoke-codex-agent.sh` uses:
+
+- `codex -a never exec ...`  
+  This means the run does not ask for manual approval prompts.
+
+Optional bypass mode:
+
+```bash
+export CODEX_SELF_ITER_AGENT_MODE=bypass
+```
+
+In bypass mode, wrapper uses:
+
+- `codex --dangerously-bypass-approvals-and-sandbox exec ...`  
+  This disables approvals and sandboxing entirely. Use only in externally sandboxed environments.
 
 ## Development
 
