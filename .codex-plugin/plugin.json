@@ -1,0 +1,18 @@
+{
+  "name": "codex-self-iter",
+  "version": "0.1.0",
+  "description": "Autonomous small-step self-iteration loop for Codex-driven task execution.",
+  "author": {
+    "name": "Dremig"
+  },
+  "license": "WTFPL",
+  "interface": {
+    "displayName": "Codex Self Iter",
+    "summary": "Read a plan file, auto-generate next steps, execute, review, and iterate until stop.",
+    "tags": [
+      "automation",
+      "agent",
+      "iteration"
+    ]
+  }
+}

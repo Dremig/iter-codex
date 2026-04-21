@@ -1,0 +1,25 @@
+# Required:
+# Must include {prompt_file}; may include {workspace}.
+agent_command_template = "codex exec --auto --prompt-file {prompt_file}"
+
+# 0 means unbounded loop until stop condition.
+max_iterations = 0
+
+# Stop when reviewer keeps giving same next_focus for this many rounds.
+max_stagnation = 4
+
+# Per command timeout.
+command_timeout_sec = 1200
+
+# Create this file under state-dir to stop loop.
+stop_file_name = "STOP"
+
+# Create this file under workspace to stop loop.
+global_stop_file_name = ".codex-stop"
+
+# Prompt hint only.
+planner_model_hint = "balanced"
+reviewer_model_hint = "strict"
+
+# Number of history rows fed back to planner each round.
+history_tail = 8
