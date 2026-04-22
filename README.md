@@ -1,12 +1,12 @@
 # codex-self-iter
 
-`codex-self-iter` is a plugin-style repository that runs a continuous autonomous loop for coding tasks:
+`codex-self-iter` is a plugin-style repository that runs a continuous autonomous goal loop:
 
 1. Read `TASK.md` + `plan.md`
-2. Generate one small next step
-3. Execute the step via agent command
-4. Review result and decide whether to continue
-5. Repeat until no meaningful next action exists or user stops it
+2. Execute one autonomous iteration in the repository
+3. Require the agent to emit a concrete `next_goal`
+4. Persist that goal and continue from it
+5. Repeat until completion/stop condition
 
 ## Repository Layout
 
@@ -62,6 +62,8 @@ Or use:
 - `.codex-self-iter/prompts/`: planner/executor/reviewer prompts
 - `.codex-self-iter/logs/iterations.jsonl`: loop records
 - `.codex-self-iter/status.json`: last iteration state
+- `.codex-self-iter/runtime.json`: persisted backoff counters and window
+- `.codex-self-iter/loop.lock`: single-instance guard file
 
 ## Configuration
 
@@ -72,6 +74,10 @@ Important fields:
 - `agent_command_template` must include `{prompt_file}`
 - `max_iterations = 0` means unbounded loop
 - `max_stagnation` prevents infinite cycling on identical `next_focus`
+- `no_change_gate` throttles no-op loops when no new git changes appear
+- `backoff_*` fields control exponential cooldown behavior
+- `lock_file_name` controls the single-instance lock path under state-dir
+- `completion_promise` marks completion when included in output
 
 ## Approval and Privilege Mode
 
@@ -90,6 +96,20 @@ In bypass mode, wrapper uses:
 
 - `codex --dangerously-bypass-approvals-and-sandbox exec ...`  
   This disables approvals and sandboxing entirely. Use only in externally sandboxed environments.
+
+## Binary Resolution (macOS launchd/system services)
+
+When running under `launchd` (or other service managers), interactive shell `PATH` is often not inherited.
+If `codex` is not found, set an explicit binary path:
+
+```bash
+export CODEX_BIN=/absolute/path/to/codex
+```
+
+The default wrapper checks in this order:
+1. `CODEX_BIN` (if executable)
+2. `PATH` via `command -v codex`
+3. common fallback paths (nvm/Homebrew/local bin)
 
 ## Development
 

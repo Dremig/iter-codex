@@ -20,6 +20,14 @@ class LoopConfig:
     planner_model_hint: str = "balanced"
     reviewer_model_hint: str = "strict"
     history_tail: int = 8
+    no_change_gate: bool = True
+    backoff_base_sec: int = 5
+    backoff_max_sec: int = 300
+    no_change_backoff_sec: int = 60
+    continue_false_backoff_sec: int = 300
+    planner_stop_backoff_sec: int = 600
+    lock_file_name: str = "loop.lock"
+    completion_promise: str = "DONE"
 
 
 def read_text(path: Path, default: str = "") -> str:
@@ -44,4 +52,12 @@ def load_config(config_path: Path | None, default_agent_cmd: str) -> LoopConfig:
         planner_model_hint=str(raw.get("planner_model_hint", "balanced")),
         reviewer_model_hint=str(raw.get("reviewer_model_hint", "strict")),
         history_tail=int(raw.get("history_tail", 8)),
+        no_change_gate=bool(raw.get("no_change_gate", True)),
+        backoff_base_sec=int(raw.get("backoff_base_sec", 5)),
+        backoff_max_sec=int(raw.get("backoff_max_sec", 300)),
+        no_change_backoff_sec=int(raw.get("no_change_backoff_sec", 60)),
+        continue_false_backoff_sec=int(raw.get("continue_false_backoff_sec", 300)),
+        planner_stop_backoff_sec=int(raw.get("planner_stop_backoff_sec", 600)),
+        lock_file_name=str(raw.get("lock_file_name", "loop.lock")),
+        completion_promise=str(raw.get("completion_promise", "DONE")),
     )

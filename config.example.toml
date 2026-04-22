@@ -23,3 +23,21 @@ reviewer_model_hint = "strict"
 
 # Number of history rows fed back to planner each round.
 history_tail = 8
+
+# Gate tight restart loops when no new git changes are produced.
+no_change_gate = true
+
+# Exponential backoff controls for transient errors.
+backoff_base_sec = 5
+backoff_max_sec = 300
+
+# Backoff controls for low-signal outcomes.
+no_change_backoff_sec = 60
+continue_false_backoff_sec = 300
+planner_stop_backoff_sec = 600
+
+# Single-instance lock under state-dir.
+lock_file_name = "loop.lock"
+
+# If this token appears in agent output, the loop treats task as complete.
+completion_promise = "DONE"

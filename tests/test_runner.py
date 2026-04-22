@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from codex_self_iter.config import LoopConfig, load_config
-from codex_self_iter.runner import extract_json, should_stop
+from codex_self_iter.runner import compute_backoff_sec, extract_json, should_stop
 
 
 def test_extract_json_direct():
@@ -29,6 +29,9 @@ def test_load_config(tmp_path: Path):
                 'agent_command_template = "x --prompt-file {prompt_file}"',
                 "max_iterations = 9",
                 "max_stagnation = 2",
+                "no_change_gate = false",
+                "backoff_base_sec = 7",
+                'completion_promise = "ALL_DONE"',
             ]
         ),
         encoding="utf-8",
@@ -37,3 +40,12 @@ def test_load_config(tmp_path: Path):
     assert cfg.agent_command_template.startswith("x ")
     assert cfg.max_iterations == 9
     assert cfg.max_stagnation == 2
+    assert cfg.no_change_gate is False
+    assert cfg.backoff_base_sec == 7
+    assert cfg.completion_promise == "ALL_DONE"
+
+
+def test_compute_backoff_sec():
+    assert compute_backoff_sec(5, 300, 1) == 5
+    assert compute_backoff_sec(5, 300, 3) == 20
+    assert compute_backoff_sec(5, 30, 5) == 30
