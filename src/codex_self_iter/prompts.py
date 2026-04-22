@@ -26,13 +26,27 @@ Recent iteration history:
 
 You must do real work in the repository (code/tests/docs/commands), then decide the next goal.
 
-Output exactly one JSON object with keys:
-- summary: short string, what you did this round
-- completed: boolean, true only if overall task is truly complete
-- next_goal: short string, required when completed=false
-- reason: short string, why next_goal is the right continuation
-- evidence: short string, key checks or observations
-- stop: boolean (true only if no meaningful next action exists)
+At the END of your response, include a compact control block in either format:
+
+Format A (preferred):
+```json
+{{
+  "summary": "...",
+  "next_goal": "...",
+  "stop": false,
+  "reason": "...",
+  "evidence": "...",
+  "completed": false
+}}
+```
+
+Format B (fallback):
+NEXT_GOAL: ...
+STOP: false
+SUMMARY: ...
+REASON: ...
+EVIDENCE: ...
+COMPLETED: false
 
 Rules:
 1) Be self-directed: choose the most valuable next step based on actual repo state.

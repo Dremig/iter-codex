@@ -60,6 +60,31 @@ def extract_json(text: str) -> dict[str, Any]:
     raise ValueError("cannot parse JSON object from agent output")
 
 
+def extract_control_block(text: str) -> dict[str, Any]:
+    def pick(pattern: str) -> str:
+        m = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        return m.group(1).strip() if m else ""
+
+    next_goal = pick(r"^NEXT_GOAL:\s*(.+)$")
+    stop_raw = pick(r"^STOP:\s*(.+)$").lower()
+    summary = pick(r"^SUMMARY:\s*(.+)$")
+    reason = pick(r"^REASON:\s*(.+)$")
+    evidence = pick(r"^EVIDENCE:\s*(.+)$")
+    completed_raw = pick(r"^COMPLETED:\s*(.+)$").lower()
+    if not (next_goal or summary or stop_raw or completed_raw):
+        raise ValueError("cannot parse control block")
+    stop = stop_raw in {"1", "true", "yes", "y"}
+    completed = completed_raw in {"1", "true", "yes", "y"}
+    return {
+        "next_goal": next_goal,
+        "stop": stop,
+        "summary": summary,
+        "reason": reason,
+        "evidence": evidence,
+        "completed": completed,
+    }
+
+
 def run_command(command_template: str, workspace: Path, prompt_file: Path, timeout_sec: int) -> tuple[int, str]:
     cmd_str = command_template.format(
         prompt_file=str(prompt_file),
@@ -256,26 +281,29 @@ def run(
 
             try:
                 step = extract_json(out)
-            except Exception as exc:
-                runtime["consecutive_errors"] = int(runtime.get("consecutive_errors", 0)) + 1
-                backoff_sec = compute_backoff_sec(
-                    cfg.backoff_base_sec, cfg.backoff_max_sec, int(runtime["consecutive_errors"])
-                )
-                backoff_until_ts = apply_backoff(runtime, backoff_sec)
-                write_runtime(runtime_path, runtime)
-                append_jsonl(
-                    history_path,
-                    {
-                        "ts": now(),
-                        "iteration": iteration,
-                        "phase": "agent_parse_error",
-                        "state": "error",
-                        "error": str(exc),
-                        "backoff_until": backoff_until_ts,
-                        "output": out,
-                    },
-                )
-                break
+            except Exception:
+                try:
+                    step = extract_control_block(out)
+                except Exception as exc:
+                    runtime["consecutive_errors"] = int(runtime.get("consecutive_errors", 0)) + 1
+                    backoff_sec = compute_backoff_sec(
+                        cfg.backoff_base_sec, cfg.backoff_max_sec, int(runtime["consecutive_errors"])
+                    )
+                    backoff_until_ts = apply_backoff(runtime, backoff_sec)
+                    write_runtime(runtime_path, runtime)
+                    append_jsonl(
+                        history_path,
+                        {
+                            "ts": now(),
+                            "iteration": iteration,
+                            "phase": "agent_parse_error",
+                            "state": "error",
+                            "error": str(exc),
+                            "backoff_until": backoff_until_ts,
+                            "output": out,
+                        },
+                    )
+                    break
 
             summary = str(step.get("summary", "")).strip() or str(step.get("objective", "")).strip() or "No summary"
             reason = str(step.get("reason", "")).strip() or str(step.get("rationale", "")).strip()
@@ -333,4 +361,3 @@ def run(
             current_goal = str(runtime.get("current_goal", "")).strip() or current_goal
 
     return 0
-

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from codex_self_iter.config import LoopConfig, load_config
-from codex_self_iter.runner import compute_backoff_sec, extract_json, should_stop
+from codex_self_iter.runner import compute_backoff_sec, extract_control_block, extract_json, should_stop
 
 
 def test_extract_json_direct():
@@ -13,6 +13,20 @@ def test_extract_json_direct():
 def test_extract_json_code_fence():
     data = extract_json("hello\n```json\n{\"ok\": true}\n```\nbye")
     assert data["ok"] is True
+
+
+def test_extract_control_block_fallback():
+    txt = """Some free-form output
+NEXT_GOAL: tighten eval semantics around timeout labels
+STOP: false
+SUMMARY: adjusted one test
+REASON: prevent false positives
+EVIDENCE: pytest -q tests/test_core.py
+COMPLETED: false
+"""
+    data = extract_control_block(txt)
+    assert data["next_goal"].startswith("tighten eval semantics")
+    assert data["stop"] is False
 
 
 def test_should_stop_with_global_file(tmp_path: Path):
